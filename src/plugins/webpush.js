@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const WebPushAPI = require("web-push");
 const Helper = require("../helper");
+const request = require("request");
 
 class WebPush {
 	constructor() {
@@ -42,6 +43,27 @@ class WebPush {
 	}
 
 	push(client, payload, onlyToOffline) {
+
+		// do not push if there are clients connected
+		if (_.size(client.attachedClients) > 0) return;
+
+		if (Helper.config.pushover) {
+			const options = {
+				uri: 'https://api.pushover.net/1/messages.json',
+				method: 'POST',
+				json: {
+					"token" => Helper.config.pushover.api_token,
+					"user" => Helper.config.pushover.user_key,
+					"message": payload.title + ": " + payload.body // XXX: leaking info
+				}
+			};
+
+			request(options, function (error, response, body) {
+				if (!error && response.statusCode == 200) {
+					console.log('pushover push successful.');
+				}
+			});
+		}
 		_.forOwn(client.config.sessions, ({pushSubscription}, token) => {
 			if (pushSubscription) {
 				if (onlyToOffline && _.find(client.attachedClients, {token}) !== undefined) {
