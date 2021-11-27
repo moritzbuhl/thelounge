@@ -469,6 +469,17 @@ module.exports = {
 			scope: "sub",
 		},
 	},
+	// ## pushover support
+
+	// These settings enable and configure pushover notifications.
+	// The available keys for the `pushover` object are:
+	// ```js
+	//   {
+	//     api_token: "<api-token>",
+	//     user_key: "<user-key>",
+	//   }
+	// ```
+	pushover: null,
 
 	// ## Debugging settings
 

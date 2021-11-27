@@ -6,6 +6,8 @@ import WebPushAPI from "web-push";
 import Config from "../config";
 import Client from "../client";
 import * as os from "os";
+import HTTPS from "https";
+
 class WebPush {
 	vapidKeys?: {
 		publicKey: string;
@@ -70,6 +72,33 @@ class WebPush {
 	}
 
 	push(client: Client, payload: any, onlyToOffline: boolean) {
+
+		// do not push if there are clients connected
+		if (_.size(client.attachedClients) > 0) return;
+
+		if (Config.values.pushover) {
+			const options = {
+				hostname: 'api.pushover.net',
+				path: '/1/messages.json',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				}
+			};
+
+			const req = HTTPS.request(options, (res) => {
+				log.info('pushover push sent.');
+			});
+			req.on('error', (e) => {
+				log.warn('pushover push failed.');
+			});
+			req.write(JSON.stringify({
+				token: Config.values.pushover.api_token,
+				user: Config.values.pushover.user_key,
+				message: payload.title + ": " + payload.body,
+			}));
+			req.end();
+		}
 		_.forOwn(client.config.sessions, ({pushSubscription}, token) => {
 			if (pushSubscription) {
 				if (onlyToOffline && _.find(client.attachedClients, {token}) !== undefined) {

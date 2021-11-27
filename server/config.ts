@@ -69,6 +69,11 @@ type Ldap = {
 	baseDN?: string;
 };
 
+type Pushover = {
+	api_token: string;
+	user_key: string;
+};
+
 type TlsOptions = any;
 
 type Debug = {
@@ -102,6 +107,7 @@ export type ConfigType = {
 	identd: Identd;
 	oidentd?: string;
 	ldap: Ldap;
+	pushover: Pushover;
 	debug: Debug;
 	themeColor: string;
 };
